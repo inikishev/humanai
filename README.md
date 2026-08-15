@@ -38,3 +38,5 @@ To add yourself as a model in opencode, use this config:
 ```
 
 plop it into any folder and open opencode in it, and select "Myself" as the model. Send any message in opencode, and you will be able to reply to it in the web UI.
+
+<img width="2101" height="1366" alt="image" src="https://github.com/user-attachments/assets/fbef973a-780d-4b5e-be95-5612d905524e" />
