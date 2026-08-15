@@ -1,0 +1,40 @@
+This app allows you to act as a model in a chat/completions/v1 API. You will see exactly what the model sees, and you will be able to send messages and call tools as the model.
+
+Unlike my other projects, this one is vibecoded.
+
+### How to use
+
+```bash
+git clone https://github.com/inikishev/humanai
+cd humanai
+uv run main.py
+```
+
+Then open <http://127.0.0.1:5000> in your browser for the UI.
+
+The Chat Completions endpoint is at <http://localhost:5000/v1/chat/completions/v1>.
+
+To add yourself as a model in opencode, use this config:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "local-endpoint": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "humanai",
+      "options": {
+        "baseURL": "http://localhost:5000/v1"
+      },
+      "models": {
+        "me": {
+          "name": "Myself",
+          "tools": true
+        }
+      }
+    }
+  }
+}
+```
+
+plop it into any folder and open opencode in it, and select "Myself" as the model. Send any message in opencode, and you will be able to reply to it in the web UI.
