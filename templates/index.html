@@ -26,15 +26,23 @@
             </div>
             <div id="request-formatted" class="request-view"></div>
             <div id="request-tools" class="request-view" style="display:none;"></div>
-            <pre id="request-payload" class="request-view" style="display:none;">No request yet.</pre>
+            <div class="raw-wrap">
+                <button type="button" class="copy-btn" onclick="copyEl(this, '#request-payload')">Copy Raw JSON</button>
+                <pre id="request-payload" class="request-view" style="display:none;">No request yet.</pre>
+            </div>
         </div>
         <div class="panel">
             <h2>Your Response</h2>
-            <div class="mode-toggle" id="mode-toggle" style="display:none;">
-                <label><input type="radio" name="resp-mode" value="text" checked onchange="switchMode('text')"><span>Text</span></label>
-                <label><input type="radio" name="resp-mode" value="tool_calls" onchange="switchMode('tool_calls')"><span>Tool Calls</span></label>
+            <div class="resp-wrap">
+                <div class="resp-tools">
+                    <button type="button" class="copy-btn" onclick="copyEl(this, '#response-input')">Copy Response</button>
+                    <div class="mode-toggle" id="mode-toggle" style="display:none;">
+                        <label><input type="radio" name="resp-mode" value="text" checked onchange="switchMode('text')"><span>Text</span></label>
+                        <label><input type="radio" name="resp-mode" value="tool_calls" onchange="switchMode('tool_calls')"><span>Tool Calls</span></label>
+                    </div>
+                </div>
+                <textarea id="response-input" placeholder="Type the assistant's response here..." disabled oninput="if (selectedId !== null && requests[selectedId]) requests[selectedId].responseText = this.value"></textarea>
             </div>
-            <textarea id="response-input" placeholder="Type the assistant's response here..." disabled oninput="if (selectedId !== null && requests[selectedId]) requests[selectedId].responseText = this.value"></textarea>
             <div class="tool-call-ui" id="tool-call-ui">
                 <div class="param-tool-name">Call a tool</div>
                 <select id="tool-select" onchange="onToolSelected()"></select>

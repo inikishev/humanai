@@ -53,6 +53,63 @@ function escapeHtml(s) {
         .replace(/'/g, '&#39;');
 }
 
+function jsQuote(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n');
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text).then(
+            function () { return true; },
+            function () { return false; }
+        );
+    }
+    try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return Promise.resolve(!!ok);
+    } catch (e) {
+        return Promise.resolve(false);
+    }
+}
+
+function copyText(btn, text) {
+    copyToClipboard(text).then(function (ok) {
+        if (!ok) return;
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        clearTimeout(btn._copyT);
+        btn._copyT = setTimeout(function () {
+            btn.textContent = orig;
+            btn.classList.remove('copied');
+        }, 1200);
+    });
+}
+
+function copyEl(btn, selector) {
+    var el = document.querySelector(selector);
+    if (!el) return;
+    copyText(btn, el.value != null ? el.value : el.textContent);
+}
+
+function copyBtn(text, label) {
+    return '<button type="button" class="copy-btn" onclick="copyText(this, \'' + jsQuote(text) + '\')">' + (label || 'Copy') + '</button>';
+}
+
 function contentToText(content) {
     if (content == null) return '';
     if (typeof content === 'string') return content;
@@ -164,11 +221,15 @@ function renderRequestTools(req) {
     tools.forEach(t => {
         const fn = t.function || {};
         html += '<div class="tool-card">';
+        html += '<div class="toolcard-header">';
         html += '<div class="tool-card-name">' + escapeHtml(fn.name) + '</div>';
+        if (fn.description) html += copyBtn(fn.description, 'Copy desc');
+        html += '</div>';
         if (fn.description) html += '<div class="tool-card-desc">' + escapeHtml(fn.description) + '</div>';
         const params = fn.parameters || {};
         if (params.properties && Object.keys(params.properties).length) {
-            html += '<details class="tool-schema"><summary>parameters</summary><pre>' + escapeHtml(JSON.stringify(params, null, 2)) + '</pre></details>';
+            const schemaJson = JSON.stringify(params, null, 2);
+            html += '<details class="tool-schema"><summary>parameters</summary><pre>' + escapeHtml(schemaJson) + '</pre>' + copyBtn(schemaJson, 'Copy schema') + '</details>';
         }
         html += '</div>';
     });
@@ -179,10 +240,13 @@ function renderRequestTools(req) {
 function renderMessage(m) {
     const role = m.role || 'unknown';
     let html = '<div class="msg msg-' + escapeHtml(role) + '">';
+    html += '<div class="msg-header">';
     html += '<div class="msg-role">' + escapeHtml(role) + '</div>';
+    const content = contentToText(m.content);
+    if (content) html += copyBtn(content);
+    html += '</div>';
     if (m.name) html += '<div class="msg-meta-line">name: ' + escapeHtml(m.name) + '</div>';
     if (m.tool_call_id) html += '<div class="msg-meta-line">tool_call_id: ' + escapeHtml(m.tool_call_id) + '</div>';
-    const content = contentToText(m.content);
     if (content) html += '<div class="msg-content">' + escapeHtml(content) + '</div>';
     if (m.tool_calls && m.tool_calls.length) {
         m.tool_calls.forEach(tc => {
@@ -191,7 +255,7 @@ function renderMessage(m) {
             if (typeof args === 'object') args = JSON.stringify(args, null, 2);
             try { args = JSON.stringify(JSON.parse(args), null, 2); } catch(e) {}
             html += '<div class="toolcall">';
-            html += '<div class="toolcall-name">' + escapeHtml(fn.name || '') + (tc.id ? ' <span style="color:var(--muted);font-weight:normal">(' + escapeHtml(tc.id) + ')</span>' : '') + '</div>';
+            html += '<div class="toolcall-header"><div class="toolcall-name">' + escapeHtml(fn.name || '') + (tc.id ? ' <span style="color:var(--muted);font-weight:normal">(' + escapeHtml(tc.id) + ')</span>' : '') + '</div>' + copyBtn(args, 'Copy args') + '</div>';
             html += '<pre class="toolcall-args">' + escapeHtml(args) + '</pre>';
             html += '</div>';
         });
@@ -343,7 +407,7 @@ function renderToolCallList(r) {
         let args = tc.function.arguments;
         try { args = JSON.stringify(JSON.parse(args), null, 2); } catch(e) {}
         html += '<div class="pending-call">';
-        html += '<div class="pending-call-header"><span class="toolcall-name">' + escapeHtml(tc.function.name) + '</span><span class="pending-call-id">' + escapeHtml(tc.id) + '</span><button class="remove-btn" onclick="removeToolCall(' + i + ')">Remove</button></div>';
+        html += '<div class="pending-call-header"><span class="toolcall-name">' + escapeHtml(tc.function.name) + '</span><span class="pending-call-id">' + escapeHtml(tc.id) + '</span>' + copyBtn(args, 'Copy args') + '<button class="remove-btn" onclick="removeToolCall(' + i + ')">Remove</button></div>';
         html += '<pre class="pending-call-args">' + escapeHtml(args) + '</pre>';
         html += '</div>';
     });
@@ -423,13 +487,15 @@ function renderActive() {
     btnRaw.classList.toggle('active', r.reqView === 'raw');
     if (r.reqView === 'formatted') {
         const html = renderRequestFormatted(r.request);
-        if (reqFormattedEl.innerHTML !== html) {
+        if (r._formattedHtml !== html) {
             reqFormattedEl.innerHTML = html;
+            r._formattedHtml = html;
         }
     } else if (r.reqView === 'tools') {
         const html = renderRequestTools(r.request);
-        if (reqToolsEl.innerHTML !== html) {
+        if (r._toolsHtml !== html) {
             reqToolsEl.innerHTML = html;
+            r._toolsHtml = html;
         }
     }
 

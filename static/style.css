@@ -190,6 +190,39 @@ h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: v
 .view-toggle button:hover { color: var(--text); border-color: var(--border-strong); filter: none; }
 .view-toggle button.active { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: #fff; border-color: transparent; box-shadow: 0 3px 10px var(--accent-soft); }
 .request-view { flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; }
+.raw-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.raw-wrap .request-view { flex: 1; min-height: 0; }
+.raw-wrap .copy-btn { align-self: flex-end; margin: 0 0 8px; }
+.resp-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.resp-wrap textarea { flex: 1; min-height: 0; }
+.resp-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.resp-tools .copy-btn { margin: 0; }
+.resp-tools .mode-toggle { margin-bottom: 0; }
+
+.copy-btn {
+    background: var(--panel-3);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0;
+    font-family: var(--sans);
+    line-height: 1.4;
+    box-shadow: none;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.copy-btn:hover { background: var(--panel-2); color: var(--text); border-color: var(--border-strong); filter: none; }
+.copy-btn.copied { background: color-mix(in srgb, var(--emerald) 16%, transparent); color: var(--emerald); border-color: color-mix(in srgb, var(--emerald) 30%, transparent); }
+
+.msg-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.msg-header .msg-role { margin-bottom: 0; }
+.toolcall-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.toolcard-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.tool-schema .copy-btn { margin: 8px 0 0; }
 
 .req-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-bottom: 4px; }
 .meta-label { color: var(--muted); margin-right: 4px; }
@@ -229,7 +262,8 @@ h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: v
 .secondary-btn { background: var(--panel-2); color: var(--text); border: 1px solid var(--border-strong); box-shadow: none; margin: 12px 0 0; }
 .secondary-btn:hover { background: var(--panel-3); filter: none; }
 .pending-call { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
-.pending-call-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pending-call-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.pending-call-header .copy-btn { margin: 0; }
 .pending-call-id { font-size: 11px; color: var(--muted); font-family: var(--mono); }
 .remove-btn { background: color-mix(in srgb, var(--red) 14%, transparent); color: var(--red); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); padding: 4px 10px; font-size: 11px; border-radius: 6px; box-shadow: none; margin: 0; }
 .remove-btn:hover { background: color-mix(in srgb, var(--red) 26%, transparent); filter: none; }
